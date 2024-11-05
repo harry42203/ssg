@@ -1,4 +1,5 @@
 from textnode import TextNode, TextType
+import re
 def split_nodes_delimiter(old_nodes, delimiter, text_type):
     nodes_to_return = []
     for node in old_nodes:
@@ -18,6 +19,7 @@ def set_nodes(node_text, delim, text_type):
     inside_delimiter = False
     if text_to_split.count(delim) % 2 != 0:
             raise Exception("Unmatched delimiter count in node text")
+    
     for node in split_nodes:
         if inside_delimiter:
             new_nodes.append(TextNode(node, text_type))
@@ -29,3 +31,22 @@ def set_nodes(node_text, delim, text_type):
         inside_delimiter = not inside_delimiter
 
     return new_nodes
+
+def split_nodes_link(old_nodes):
+    nodes_to_return = []
+    for node in old_nodes:
+        text = node.text
+        pattern = r"\[([^\]]+)\]\(([^)]+)\)"
+        matches = re.findall(pattern, text)
+        for match in matches:
+            url_name, url = match
+            nodes_to_return.append(TextNode(url_name,TextType.LINK, url))
+            text.replace(url_name, "*")
+            text.replace(url, "*")
+            print(text)
+    
+    return nodes_to_return
+
+
+def split_nodes_image(old_nodes):
+    pass
