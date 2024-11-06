@@ -1,11 +1,12 @@
 from textnode import TextNode, TextType
-import re
+from link_image_extraction import extract_markdown_links, extract_markdown_images
 def split_nodes_delimiter(old_nodes, delimiter, text_type):
     nodes_to_return = []
     for node in old_nodes:
         if node.text_type == TextType.TEXT:
-            if delimiter not in node.text:
-                raise Exception("Delimiter not in node")
+            #if delimiter not in node.text:
+                #raise Exception("Delimiter not in node")
+                
             nodes_to_return.extend(set_nodes(node.text, delimiter, text_type))
         else: 
             nodes_to_return.append(node)
@@ -35,18 +36,55 @@ def set_nodes(node_text, delim, text_type):
 def split_nodes_link(old_nodes):
     nodes_to_return = []
     for node in old_nodes:
+        if node.text_type != TextType.TEXT:
+            nodes_to_return.append(node)
+            continue
+
         text = node.text
-        pattern = r"\[([^\]]+)\]\(([^)]+)\)"
-        matches = re.findall(pattern, text)
+        matches = extract_markdown_links(text)
+
+        remaining_text = text
+
         for match in matches:
             url_name, url = match
-            nodes_to_return.append(TextNode(url_name,TextType.LINK, url))
-            text.replace(url_name, "*")
-            text.replace(url, "*")
-            print(text)
-    
+            full_link = f"[{url_name}]({url})"
+            sections = remaining_text.split(full_link, maxsplit=1)
+
+            if sections[0]:
+                nodes_to_return.append(TextNode(sections[0],TextType.TEXT))
+            
+            nodes_to_return.append(TextNode(url_name, TextType.LINK, url))
+            remaining_text = sections[1] if len(sections) > 1 else ""
+
+        if remaining_text:
+            nodes_to_return.append(TextNode(remaining_text, TextType.TEXT))
+
     return nodes_to_return
 
-
 def split_nodes_image(old_nodes):
-    pass
+    nodes_to_return = []
+    for node in old_nodes:
+        if node.text_type != TextType.TEXT:
+            nodes_to_return.append(node)
+            continue
+
+        text = node.text
+        matches = extract_markdown_images(text)
+
+        remaining_text = node.text
+
+        for match in matches:
+            img_name, img = match
+            full_link = f"![{img_name}]({img})"
+            sections = remaining_text.split(full_link, maxsplit=1)
+
+            if sections[0]:
+                nodes_to_return.append(TextNode(sections[0],TextType.TEXT))
+            
+            nodes_to_return.append(TextNode(img_name, TextType.IMAGE, img))
+            remaining_text = sections[1] if len(sections) > 1 else ""
+
+        if remaining_text:
+            nodes_to_return.append(TextNode(remaining_text, TextType.TEXT))
+
+    return nodes_to_return

@@ -1,12 +1,13 @@
-
 from enum import Enum
 from htmlnode import LeafNode
+
 
 class TextType(Enum):
     TEXT = "Text"
     BOLD = "Bold"
     ITALIC = "Italic"
     CODE = "Code"
+    CODE_BLOCK = "pre_code"
     LINK = "Link"
     IMAGE = "Image"
 
@@ -30,6 +31,8 @@ def text_node_to_html_node(text_node):
             node = LeafNode("b", text_node.text)
         case (TextType.ITALIC):
             node = LeafNode("i", text_node.text)
+        case (TextType.CODE_BLOCK):
+            node = LeafNode("pre_code", text_node.text)
         case (TextType.CODE):
             node = LeafNode("code", text_node.text)
         case (TextType.LINK):
@@ -39,5 +42,3 @@ def text_node_to_html_node(text_node):
         case _:
             raise Exception("Not a valid node type")
     return node
-
-

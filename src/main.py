@@ -1,18 +1,8 @@
-from textnode import TextNode, TextType
-from htmlnode import HTMLNode, LeafNode, ParentNode
-from link_image_extraction import extract_markdown_links, extract_markdown_images
-from splitnodes import split_nodes_delimiter, split_nodes_image, split_nodes_link
+from markdown_to_html_nodes import markdown_to_html_nodes
 
 def main():
-    # Create a test node and print it
-    node = TextNode(
-    "This is text with a link [to boot dev](https://www.boot.dev) and [to youtube](https://www.youtube.com/@bootdotdev)",
-    TextType.TEXT,
-    )
-
-    print(split_nodes_link([node]))
-
-
-
+    text = "### This is a heading\n\n## This is a h2\n\n###### This is a h6\n\n```code\nmorecode```\n\nThis is a paragraph of *text*. It has, some some **bold** and *italic* words **inside of** it\n\n* This is the first list item in a list block\n* This is a list item\n* This is another list item"
+    html_str =  markdown_to_html_nodes(text)
+    print(html_str)
 if __name__ == "__main__":
     main()
